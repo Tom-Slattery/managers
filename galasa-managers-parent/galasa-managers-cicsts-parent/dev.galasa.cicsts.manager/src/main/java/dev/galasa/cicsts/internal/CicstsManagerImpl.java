@@ -76,7 +76,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
     private final ArrayList<ICicsRegionLogonProvider> logonProviders = new ArrayList<>();
 
     private String provisionType;
-    
+
     private ICeciProvider ceciProvider;
     private ICedaProvider cedaProvider;
     private ICemtProvider cemtProvider;
@@ -88,6 +88,9 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
         super.initialise(framework, allManagers, activeManagers, galasaTest);
         // *** Check to see if any of our annotations are present in the test class
         // *** If there is, we need to activate
+
+        logger.info("THIS IS MY CHANGED MANAGER");
+
         if(galasaTest.isJava()) {
             List<AnnotatedField> ourFields = findAnnotatedFields(CicstsManagerField.class);
             if (ourFields.isEmpty() && !required) {
@@ -157,7 +160,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
             provisioner.cicsProvisionGenerate();
         }
 
-        // Now provision all the individual annotations 
+        // Now provision all the individual annotations
 
         List<AnnotatedField> annotatedFields = findAnnotatedFields(CicstsManagerField.class);
 
@@ -209,7 +212,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
 
         String tag = defaultString(annotation.cicsTag(), "PRIMARY").toUpperCase();
         String loginCredentialsTag = defaultString(annotation.loginCredentialsTag(), "").toUpperCase();
-        
+
         ICicsRegionProvisioned region = this.provisionedCicsRegions.get(tag);
         if (region == null) {
             throw new CicstsManagerException("Unable to setup CICS Terminal for field '" + field.getName() + "', for region with tag '"
@@ -224,9 +227,9 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
             throw new CicstsManagerException(
                     "Unable to setup CICS Terminal for field " + field.getName() + ", tagged region " + tag, e);
         }
-       
+
     }
-    
+
     @Override
     public ICicsTerminal generateCicsTerminal(String tag) throws CicstsManagerException{
     	ICicsRegionProvisioned region = this.provisionedCicsRegions.get(tag);
@@ -243,7 +246,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
                     "Unable to setup CICS Terminal for tagged region " + tag, e);
         }
     }
-    
+
     @Override
     public ICicsRegion locateCicsRegion(String tag) throws CicstsManagerException {
     	ICicsRegionProvisioned region = this.provisionedCicsRegions.get(tag);
@@ -252,7 +255,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
         }
         return region;
     }
-    
+
     @Override
     public void provisionBuild() throws ManagerException, ResourceUnavailableException {
         // First, give the provisioners the opportunity to build CICS regions
@@ -280,15 +283,15 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
             if (terminal.isConnected()) {
                 continue;
             }
-            
+
             if (!terminal.isConnectAtStartup()) {
                 continue;
             }
-            
+
             if (!terminal.getCicsRegion().isProvisionStart()) {
                 continue;
             }
-            
+
             try {
                 terminal.connectToCicsRegion();
             } catch (CicstsManagerException e) {
@@ -307,14 +310,14 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
             } catch (TerminalInterruptedException e) { // NOSONAR - wish to hide disconnect errors
             }
         }
-        
+
         // Give the provisioners the opportunity to stop CICS regions
         for (ICicsRegionProvisioner provisioner : provisioners) {
             provisioner.cicsProvisionStop();
         }
 
     }
-    
+
     @Override
     public void provisionDiscard() {
         // Give the provisioners the opportunity to discard CICS regions
@@ -365,7 +368,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
     public void registerCemtProvider(@NotNull ICemtProvider cemtProvider) {
         this.cemtProvider = cemtProvider;
     }
-    
+
     @Override
     public void registerCicsResourceProvider(@NotNull ICicsResourceProvider cicsResourceProvider) {
         this.cicsResourceProvider = cicsResourceProvider;
@@ -377,7 +380,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
         if (this.ceciProvider == null) {
             throw new CicstsManagerException("No CECI provider has been registered");
         }
-        
+
         return this.ceciProvider;
     }
 
@@ -387,7 +390,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
         if (this.cedaProvider == null) {
             throw new CicstsManagerException("No CEDA provider has been registered");
         }
-        
+
         return this.cedaProvider;
     }
 
@@ -397,7 +400,7 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
         if (this.cemtProvider == null) {
             throw new CicstsManagerException("No CEMT provider has been registered");
         }
-        
+
         return this.cemtProvider;
     }
 
@@ -406,16 +409,16 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
     	if (this.cicsResourceProvider == null) {
             throw new CicstsManagerException("No CICS Resource provider has been registered");
         }
-        
+
         return this.cicsResourceProvider;
 	}
 
 	@Override
     public void cicstsRegionStarted(ICicsRegion region) throws CicstsManagerException {
         // A region has started, so connect everything up
-        
+
         // Connect terminals that are associated with the region
-        
+
         for(CicsTerminalImpl terminal : terminals) {
             if (terminal.getCicsRegion() == region) {
                 if (terminal.isConnectAtStartup()) {
@@ -446,12 +449,12 @@ public class CicstsManagerImpl extends AbstractManager implements ICicstsManager
 		HashMap<String, ICicsRegionProvisioned> clonedTaggedCicsRegions = new HashMap<>();
 		for(Map.Entry<String, ICicsRegionProvisioned> entry : this.provisionedCicsRegions.entrySet()) {
 			clonedTaggedCicsRegions.put(entry.getKey(), entry.getValue());
-		}		
+		}
 		return clonedTaggedCicsRegions;
 	}
 
 	@Override
-	public List<ICicsTerminal> getCicsTerminals() {	
+	public List<ICicsTerminal> getCicsTerminals() {
 		return new ArrayList<>(this.terminals);
 	}
 }
